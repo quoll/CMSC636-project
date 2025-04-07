@@ -9,7 +9,7 @@ import re
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import Sequential
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Input
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Input, Dropout
 from keras.optimizers import Adam
 from keras.losses import BinaryCrossentropy
 from keras.metrics import BinaryAccuracy
@@ -19,7 +19,7 @@ default_input_file = 'CheXpert-v1.0 batch 2 (train 1).zip'
 default_validate_file = 'CheXpert-v1.0 batch 1 (validate & csv).zip'
 epochs = 10  # Number of epochs for training
 batch_size = 4  # Adjust based on your system's memory
-bounding_square = 2880
+bounding_square = 1440
 image_ext = '.jpg'
 
 labels_in_order = ["Enlarged Cardiomediastinum", "Cardiomegaly", "Lung Opacity", "Lung Lesion",
@@ -100,7 +100,7 @@ def pad_to_fixed_size(image, target_size=(bounding_square, bounding_square)):
     )
     # The model needs to know the shape of the input tensor, so we set it explicitly here
     padded.set_shape([bounding_square, bounding_square, 1])
-    tf.print("Padded image from (", current_height, ",", current_width, ") to", tf.shape(padded))
+    # tf.print("Padded image from (", current_height, ",", current_width, ") to", tf.shape(padded))
     return padded
 
 
@@ -180,9 +180,9 @@ def create_model():
 
         Flatten(),
 
-        # Dense(512, activation='relu'),
+        Dense(512, activation='relu'),
         Dense(128, activation='relu'),
-        # Dropout(0.5),
+        Dropout(0.5),
         Dense(14, activation='sigmoid')
     ])
     model.compile(optimizer=Adam(learning_rate=1e-3),
@@ -195,15 +195,17 @@ def create_model():
 def process_dataset(model, dataset, length, validate_dataset, vlength):
     steps_per_epoch = math.ceil(length / batch_size)
     dataset = dataset.batch(batch_size)
-    dataset = dataset.repeat()  # Repeat the dataset for multiple epochs
+    dataset = dataset.repeat(epochs)  # Repeat the dataset for multiple epochs
+    dataset = dataset.prefetch(tf.data.experimental.AUTOTUNE)
     validation_steps = math.ceil(vlength / batch_size)
     validate_dataset = validate_dataset.batch(batch_size)
+    validate_dataset = validate_dataset.prefetch(tf.data.experimental.AUTOTUNE)
 
     #time the epochs to see how long it takes to train
     start_time = tf.timestamp()  # Start time for timing the training
     model.fit(dataset,
               batch_size=batch_size,
-              epochs=epochs,
+              # epochs=epochs,
               steps_per_epoch=steps_per_epoch,
               validation_data=validate_dataset,
               validation_steps=validation_steps)
@@ -211,8 +213,8 @@ def process_dataset(model, dataset, length, validate_dataset, vlength):
     elapsed_time = end_time - start_time
     print(f"Training completed in {elapsed_time.numpy()} seconds.")
     # Save the model
-    model.save('model.h5')
-    print("Model saved as 'model.h5'.")
+    model.save('model.keras')
+    print("Model saved as 'model.keras'.")
     return model
 
 
