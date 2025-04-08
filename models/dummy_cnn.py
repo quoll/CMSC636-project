@@ -1,5 +1,3 @@
-# # models/base_cnn.py
-
 import tensorflow as tf
 from tensorflow import keras
 from keras.models import Sequential
@@ -13,21 +11,16 @@ from config.constants import bounding_square, batch_size, epochs
 import os
 import math
 
+
 def build_model():
     model = Sequential([
         Input(shape=(bounding_square, bounding_square, 1)),
-        Conv2D(64, (5, 5), activation='relu'),
-        MaxPooling2D(pool_size=(2, 2)),
-
-        Conv2D(128, (5, 5), activation='relu'),
-        MaxPooling2D(pool_size=(2, 2)),
-
-        Conv2D(256, (5, 5), activation='relu'),
+        Conv2D(8, (3, 3), activation='relu'),  # solo 8 filtros
         MaxPooling2D(pool_size=(2, 2)),
 
         Flatten(),
-        Dense(128, activation='relu'),
-        Dense(14, activation='sigmoid')
+        Dense(16, activation='relu'),         # capa densa muy pequeña
+        Dense(14, activation='sigmoid')       # salida igual
     ])
 
     model.compile(
@@ -47,7 +40,7 @@ def train_model(model, train_dataset, train_size, val_dataset, val_size, args):
 
     os.makedirs("results/logs", exist_ok=True)
 
-    log_file = f"results/logs/{args.model_id}_{args.benchmark}_trainlog.csv"
+    log_file = f"results/logs/{args.model_id}_trainlog.csv"
     csv_logger = CSVLogger(log_file, append=True)
 
     print(f"[{args.model_id}] Starting training... Logging to {log_file}")
@@ -72,7 +65,3 @@ def train_model(model, train_dataset, train_size, val_dataset, val_size, args):
     print(f"[{args.model_id}] Training completed in {duration.numpy():.2f} seconds.")
     print(f"[{args.model_id}] Model saved to '{model_path}'")
     print(f"[{args.model_id}] Training log saved to '{log_file}'")
-
-
-
-

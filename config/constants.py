@@ -4,7 +4,7 @@
 default_label_file = "data/sample_label.json"
 default_input_file = "data/sample.zip"
 default_validate_file = "data/sample_valid.zip"
-default_test_file = "data/test.zip"
+default_test_file = "data/sample_valid.zip"
 
 bounding_square = 2880
 batch_size = 4

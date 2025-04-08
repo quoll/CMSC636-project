@@ -46,7 +46,6 @@ def main():
     test_file = default_test_file
     label_file = default_label_file
 
-    # Verificación condicional de archivos
     required_files = [label_file]
     if args.train:
         required_files += input_files + [validate_file]
