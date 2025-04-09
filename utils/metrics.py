@@ -25,23 +25,21 @@ def compute_auroc_per_class(y_true, y_pred, class_names):
 def log_metrics(model_id, metrics_dict, csv_path="results/metrics_log.csv"):
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    rows = [
-        {
-            "model_id": model_id,
-            "metric_name": metric,
-            "value": value,
-            "timestamp": timestamp
-        }
-        for metric, value in metrics_dict.items()
-    ]
+    # Construir una sola fila con todas las métricas como columnas
+    row = {
+        "model_id": model_id,
+        "timestamp": timestamp,
+        **metrics_dict
+    }
 
-    df = pd.DataFrame(rows)
+    df = pd.DataFrame([row])  # una sola fila
 
     os.makedirs(os.path.dirname(csv_path), exist_ok=True)
 
+    # Escribir en modo append o crear si no existe
     if os.path.exists(csv_path):
         df.to_csv(csv_path, mode='a', header=False, index=False)
     else:
         df.to_csv(csv_path, mode='w', header=True, index=False)
 
-    print(f"[metrics] Logged {len(rows)} metrics to {csv_path}")
+    print(f"[metrics] Logged metrics for model '{model_id}' to {csv_path}")

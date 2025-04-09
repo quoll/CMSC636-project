@@ -2,6 +2,8 @@
 
 import numpy as np
 import tensorflow as tf
+from tensorflow import keras
+from keras.models import load_model
 from sklearn.metrics import roc_auc_score
 from utils.data_loader import dataset_from_zip
 from utils.metrics import log_metrics
@@ -28,9 +30,9 @@ def evaluate_model_on_test(model_path, test_file, label_data, model_id):
 
     print("[test] Preparing test dataset...")
     test_ds, test_len = dataset_from_zip(test_file, label_data)
-    test_ds = test_ds.batch(32)  
+    test_ds = test_ds.batch(50)  
 
-    steps = int(np.ceil(test_len / 32))
+    steps = int(np.ceil(test_len / 50))
 
     print(f"[test] Evaluating on {test_len} instances...")
 
